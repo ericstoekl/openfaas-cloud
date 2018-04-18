@@ -49,15 +49,15 @@ func Handle(req []byte) string {
 
 	var found bool
 
+	customersURL := os.Getenv("customers_url")
 	if readFlag("validate_customers") {
-		customersURL := os.Getenv("customers_url")
 
 		customers, getErr := getCustomers(customersURL)
 		if getErr != nil {
 			return getErr.Error()
 		}
 
-		found := false
+		found = false
 		for _, customer := range customers {
 			if customer == pushEvent.Repository.Owner.Login {
 				found = true
@@ -162,7 +162,7 @@ func Init() {
 }
 
 func readFlag(key string) bool {
-	if val, exists := os.LookupEnv(key); val == "true" || val == "1" {
+	if val, _ := os.LookupEnv(key); val == "true" || val == "1" {
 		return true
 	}
 	return false
