@@ -128,6 +128,20 @@ func makeTar(pushEvent sdk.PushEvent, filePath string, services *stack.Services)
 			return err1
 		})
 
+		tarFileStat, statError := os.Stat(tarPath)
+		if statError != nil {
+			return nil, statError
+		}
+		tarFileSize := tarFileStat.Size()
+
+		auditEvent := sdk.AuditEvent{
+			Message: fmt.Sprintf("Built tar file for %s, size: %d bytes.", v.Name, tarFileSize),
+			Owner:   pushEvent.Repository.Owner.Login,
+			Repo:    pushEvent.Repository.Name,
+			Source:  Source,
+		}
+		sdk.PostAudit(auditEvent)
+
 		if err != nil {
 			return []tarEntry{}, err
 		}

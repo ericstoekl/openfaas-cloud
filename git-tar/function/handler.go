@@ -14,6 +14,8 @@ import (
 	"github.com/openfaas/openfaas-cloud/sdk"
 )
 
+const Source = "gh-tar"
+
 // Handle a serverless request
 func Handle(req []byte) []byte {
 
@@ -80,6 +82,14 @@ func collect(pushEvent sdk.PushEvent, stack *stack.Services) error {
 	c := http.Client{
 		Timeout: time.Second * 3,
 	}
+
+	auditEvent := sdk.AuditEvent{
+		Message: fmt.Sprintf("Running garbage-collect on %d functions...", len(garbageReq.Functions)),
+		Owner:   pushEvent.Repository.Owner.Login,
+		Repo:    pushEvent.Repository.Name,
+		Source:  Source,
+	}
+	sdk.PostAudit(auditEvent)
 
 	bytesReq, _ := json.Marshal(garbageReq)
 	bufferReader := bytes.NewBuffer(bytesReq)
